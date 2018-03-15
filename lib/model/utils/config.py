@@ -190,20 +190,20 @@ __C.TEST.PROPOSAL_METHOD = 'gt'
 ## NMS threshold used on RPN proposals
 __C.TEST.RPN_NMS_THRESH = 0.5
 ## Number of top scoring boxes to keep before apply NMS to RPN proposals
-__C.TEST.RPN_PRE_NMS_TOP_N = 300
+__C.TEST.RPN_PRE_NMS_TOP_N = 1000
 
 ## Number of top scoring boxes to keep after applying NMS to RPN proposals
-__C.TEST.RPN_POST_NMS_TOP_N = 50
+__C.TEST.RPN_POST_NMS_TOP_N = 300
 
 # Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
 __C.TEST.RPN_MIN_SIZE = 16
 
 # Testing mode, default to be 'nms', 'top' is slower but better
 # See report for details
-__C.TEST.MODE = 'top'
+__C.TEST.MODE = 'nms'
 
 # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
-__C.TEST.RPN_TOP_N = 50
+__C.TEST.RPN_TOP_N = 300
 
 #
 # ResNet options
@@ -289,7 +289,8 @@ __C.POOLING_SIZE = 7
 __C.MAX_NUM_GT_BOXES = 20
 
 # Anchor scales for RPN
-__C.ANCHOR_SCALES = [4,8,16,32]
+__C.ANCHOR_SCALES = [8,16,32]
+# __C.ANCHOR_SCALES = [4,8,16,32]
 
 # Anchor ratios for RPN
 __C.ANCHOR_RATIOS = [0.5,1,2]

@@ -48,9 +48,13 @@ def draw_detections(frame, insts):
     return frame
 
 checkpoint_file = "models/faster_rcnn_1_10_14657_resnet101_coco.pth"
-detection_threshold = 0.3
+arch = "res101_ls"
+# checkpoint_file = "models/faster_rcnn_1_10_625_vgg_voc.pth"
+# arch = "vgg16"
 
-objdetect = ObjectDetector(checkpoint_file, detection_thresh=detection_threshold, arch='resnet101')
+detection_threshold = 0.5
+
+objdetect = ObjectDetector(checkpoint_file, detection_thresh=detection_threshold, arch=arch)
 
 tracker = ObjectsTracker()
 
@@ -65,7 +69,7 @@ old_proposals = []
 prev_frame = None
 
 cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
-cv2.setWindowProperty("frame",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+# cv2.setWindowProperty("frame",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
 
 while True:
@@ -81,7 +85,7 @@ while True:
                 events = objdetect.detect(frame)
 
         with Timer('--track'):
-            tracker.track(events)
+            tracker.track(events, frame)
 
         frame = draw_detections(frame, tracker.instances)
 

@@ -1,15 +1,35 @@
 import numpy as np
+import dlib
+import pickle
 
+predictor_path = "models/shape_predictor_5_face_landmarks.dat"
+face_rec_model_path = "models/dlib_face_recognition_resnet_model_v1.dat"
+faces_path = "models/faces.p"
+
+
+labels_mapping = {
+    1: "Tal",
+    2: "Dror"
+}
+
+
+TRY_IDENTIFY = False
 
 class Instance:
     _instances_count = 0
-    def __init__(self, event):
+    face_detector = dlib.get_frontal_face_detector()
+    sp = dlib.shape_predictor(predictor_path)
+    facerec = dlib.face_recognition_model_v1(face_rec_model_path)
+    faces = pickle.load(open(faces_path, "rb"))
+    faces_dist_thresh = 0.55
+
+    def __init__(self, event, frame=None):
         self._features = event._features
         self._events = [event]
         self._stability = 1
         self._bbox = event._bbox
         self._label = event._label
-
+        self._identified = False
         self._score = event._score
         self._com = event._com
 
@@ -18,6 +38,8 @@ class Instance:
         self._name = "%s_%d" % (self._label, Instance._instances_count)
         Instance._instances_count += 1
 
+        if self._label == 'person' and self._identified is False:
+            self._identify(frame)
 
     @property
     def stability(self):
@@ -27,7 +49,38 @@ class Instance:
     def features(self):
         return self._features
 
-    def update(self, ev, partial=False):
+    def _identify(self, frame):
+        if TRY_IDENTIFY is False:
+            return
+
+        if self.stability % 10 > 0:
+            return
+
+        dets = self.face_detector(frame, 1)
+
+        if len(dets) == 0:
+            return
+
+        d = dets[0] # assume only one face if any
+        shape = self.sp(frame, d)
+
+        face_descriptor = self.facerec.compute_face_descriptor(frame, shape)
+        face_descriptor_str = str(face_descriptor).replace('\n', ',')
+        face_descriptor_arr = face_descriptor_str.split(',')
+        pred = self.faces.predict([face_descriptor_arr])
+        dist, _ = self.faces.kneighbors([face_descriptor_arr])
+        mean_dist = np.mean(dist)
+
+        if mean_dist < self.faces_dist_thresh:
+            rec = pred[0]
+
+            self._identified = True
+            self._name = labels_mapping[rec]
+        else:
+            print("detect face but unknown")
+
+
+    def update(self, ev, partial=False, frame=None):
         self._events.append(ev)
         self._features = ev._features
         self._label = ev._label
@@ -37,11 +90,15 @@ class Instance:
         self._estimate_object_distance()
         self._stability = min(self._stability + 1, 10)
 
+        if self._label == 'person' and self._identified == False:
+            self._identify(frame)
+
+
 
     def _estimate_object_distance(self, far_threshold=3.0, near_threshold=1.5):
 
         _person_width_in_meters = 0.75
-        _focal_length = 450.0
+        _focal_length = 210.0
 
 
         width_in_pix = float(self._bbox[3]) - float(self._bbox[1])
@@ -76,7 +133,7 @@ class ObjectsTracker:
         return np.linalg.norm(a-b)
 
 
-    def match_events_to_instances(self, events):
+    def match_events_to_instances(self, events, frame=None):
         if len(self._instances) == 0:
             return events
 
@@ -95,7 +152,7 @@ class ObjectsTracker:
             val = total_dist[j, i]
             if val < self._threshold:
                 inst = self._instances[i]
-                inst.update(ev)
+                inst.update(ev, frame=frame)
                 matched_insts.append(inst)
             else:
                 unused_events.append(ev)
@@ -108,18 +165,18 @@ class ObjectsTracker:
         return unused_events
 
 
-    def initiate_new_instances(self, events):
+    def initiate_new_instances(self, events, frame=None):
         for event in events:
-            self._instances.append(Instance(event))
+            self._instances.append(Instance(event, frame))
 
 
     def filter_events(self, events):
         return events
 
-    def track(self, events):
+    def track(self, events, frame=None):
         events = self.filter_events(events)
-        unmatched_events = self.match_events_to_instances(events)
-        self.initiate_new_instances(unmatched_events)
+        unmatched_events = self.match_events_to_instances(events, frame)
+        self.initiate_new_instances(unmatched_events, frame)
 
         self.remove_old_instances()
 
