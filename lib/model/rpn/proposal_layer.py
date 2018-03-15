@@ -12,6 +12,8 @@ from __future__ import absolute_import
 import torch
 import torch.nn as nn
 import numpy as np
+import cv2
+
 import math
 import yaml
 from model.utils.config import cfg
@@ -157,6 +159,18 @@ class _ProposalLayer(nn.Module):
             num_proposal = proposals_single.size(0)
             output[i,:,0] = i
             output[i,:num_proposal,1:] = proposals_single
+
+
+            if DEBUG:
+                debug_img = np.zeros(im_info[0,:2].cpu().numpy().astype('int'))
+                for i in range(proposals_single.shape[0]):
+                    x0, y0, x1, y1 = proposals_single[i, :]
+                    p1 = (int(x0), int(y0))
+                    p2 = (int(x1), int(y1))
+                    debug_img = cv2.rectangle(debug_img, p1, p2, color=(255, 255, 255))
+                cv2.imshow("region_proposals", debug_img)
+                cv2.waitKey(1)
+
 
         return output
 

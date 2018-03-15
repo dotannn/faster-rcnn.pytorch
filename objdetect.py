@@ -33,19 +33,48 @@ class DetectionEvent:
 
 
 class ObjectDetector:
-    _classes = np.asarray(['__background__',
-                           'aeroplane', 'bicycle', 'bird', 'boat',
-                           'bottle', 'bus', 'car', 'cat', 'chair',
-                           'cow', 'diningtable', 'dog', 'horse',
-                           'motorbike', 'person', 'pottedplant',
-                           'sheep', 'sofa', 'train', 'tvmonitor'])
+    # _classes = np.asarray(['__background__',
+    #                        'aeroplane', 'bicycle', 'bird', 'boat',
+    #                        'bottle', 'bus', 'car', 'cat', 'chair',
+    #                        'cow', 'diningtable', 'dog', 'horse',
+    #                        'motorbike', 'person', 'pottedplant',
+    #                        'sheep', 'sofa', 'train', 'tvmonitor'])
 
+    _classes = np.asarray(['__background__', 'person', 'bicycle',
+                           'car', 'motorcycle', 'airplane',
+                           'bus', 'train', 'truck',
+                           'boat', 'traffic light', 'fire hydrant',
+                           '_', 'stop sign', 'parking meter',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_',
+                           '_', '_', '_'])
 
     def __init__(self, checkpoint_file, detection_thresh=0.5, arch='vgg16', class_agnostic=False, cuda=True):
 
         if arch=='vgg16':
+            cfg_from_file("cfgs/vgg16.yml" % arch)
             self._fasterRCNN = vgg16(self._classes, pretrained=False, class_agnostic=class_agnostic)
         elif arch=='resnet101':
+            cfg_from_file("cfgs/res101_ls.yml")
             self._fasterRCNN = resnet(self._classes, 101, pretrained=False, class_agnostic=class_agnostic)
         else:
             raise NotImplementedError()

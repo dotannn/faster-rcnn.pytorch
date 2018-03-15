@@ -34,37 +34,46 @@ class Timer(object):
 
     def __exit__(self, type, value, traceback):
         print ('%s: %.3fs' % (self.name, (time.time() - self.tstart)))
+
 def draw_detections(frame, insts):
     for inst in insts:
+        if inst.stability < 1:
+            continue
         p1 = (int(inst._bbox[0]), int(inst._bbox[1]))
         p2 = (int(inst._bbox[2]), int(inst._bbox[3]))
         name = inst._name
         frame = cv2.rectangle(frame, p1, p2, color=(0,0,255), thickness=2 )
-        text = "%s %.2f | %s" % (name, inst._score, inst._distance_level)
+        text = "%s %.2f | %s (%.2fm)" % (name, inst._score, inst._distance_level, inst._distance)
         frame = cv2.putText(frame, text, (p1[0], p1[1]+30), fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1,color=(0, 255, 0))
     return frame
 
-checkpoint_file = "models/faster_rcnn_1_10_625.pth"
-detection_threshold = 0.5
+checkpoint_file = "models/faster_rcnn_1_10_14657_resnet101_coco.pth"
+detection_threshold = 0.3
 
-objdetect = ObjectDetector(checkpoint_file)
+objdetect = ObjectDetector(checkpoint_file, detection_thresh=detection_threshold, arch='resnet101')
 
 tracker = ObjectsTracker()
 
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
-def detect_motion(frame):
+def detect_motion(prev_frame, frame):
     return []
 
 
 old_proposals = []
+prev_frame = None
+
+cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("frame",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+
+
 while True:
-    with FPSEstimator('-frame'):
+    with FPSEstimator('-total'):
         ok, frame = cap.read()
 
         with Timer('--detect'):
-            motion_boxes = detect_motion(frame)
+            motion_boxes = detect_motion(prev_frame, frame)
 
             if motion_boxes or old_proposals:
                 events = objdetect.detect(frame, motion_boxes=np.vstack(motion_boxes, old_proposals))
@@ -78,9 +87,12 @@ while True:
 
         old_proposals = tracker.current_proposals()
 
+
         cv2.imshow( "frame", frame )
         if cv2.waitKey( 1 ) & 0xFF == ord( 'q' ):
             break
+
+        prev_frame = frame.copy()
 
 
 cap.release()

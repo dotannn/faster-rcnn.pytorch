@@ -38,13 +38,21 @@ class Instance:
         self._stability = min(self._stability + 1, 10)
 
 
-    def _estimate_object_distance(self, far_threshold=0.10, near_threshold=0.2):
+    def _estimate_object_distance(self, far_threshold=3.0, near_threshold=1.5):
 
-        width = float(self._bbox[3]) - float(self._bbox[1])
+        _person_width_in_meters = 0.75
+        _focal_length = 450.0
 
-        if width > near_threshold:
+
+        width_in_pix = float(self._bbox[3]) - float(self._bbox[1])
+
+        dist = (_person_width_in_meters * _focal_length) / width_in_pix
+
+        self._distance = dist
+
+        if dist < near_threshold:
             self._distance_level = 'Near'
-        elif width < far_threshold:
+        elif dist > far_threshold:
             self._distance_level = 'Far'
         else:
             self._distance_level = 'Mid'
@@ -53,8 +61,8 @@ class Instance:
 class ObjectsTracker:
     def __init__(self):
         self._instances = []
-        self._appearance_factor = 0.7
-        self._euclidean_factor = 0.1
+        self._appearance_factor = 0.5
+        self._euclidean_factor = 0.0
 
         self._threshold = 45.0
 
