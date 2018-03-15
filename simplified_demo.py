@@ -80,7 +80,7 @@ class_agnostic = False
 fasterRCNN = vgg16(pascal_classes, pretrained=False, class_agnostic=class_agnostic)
 
 fasterRCNN.create_architecture()
-checkpoint_file = "/media/dotan/Data/models/faster_rcnn_1_10_625.pth"
+checkpoint_file = "models/faster_rcnn_1_10_625.pth"
 
 checkpoint = torch.load(checkpoint_file)
 

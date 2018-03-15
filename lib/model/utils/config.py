@@ -200,10 +200,10 @@ __C.TEST.RPN_MIN_SIZE = 16
 
 # Testing mode, default to be 'nms', 'top' is slower but better
 # See report for details
-__C.TEST.MODE = 'nms'
+__C.TEST.MODE = 'top'
 
 # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
-__C.TEST.RPN_TOP_N = 5000
+__C.TEST.RPN_TOP_N = 25
 
 #
 # ResNet options
