@@ -20,7 +20,6 @@ from model.faster_rcnn.resnet import resnet
 xrange = range
 
 
-
 class DetectionEvent:
     def __init__(self, bbox, score, label, features):
         self._bbox = bbox
@@ -70,11 +69,11 @@ class ObjectDetector:
 
     def __init__(self, checkpoint_file, detection_thresh=0.25, arch='vgg16', class_agnostic=False, cuda=True):
 
-        if arch=='vgg16':
+        if arch == 'vgg16':
             cfg_from_file("cfgs/%s.yml" % arch)
             self._classes = self._voc_classes
             self._fasterRCNN = vgg16(self._classes, pretrained=False, class_agnostic=class_agnostic)
-        elif arch=='res101_ls':
+        elif arch == 'res101_ls':
             self._classes = self._coco_classes
             cfg_from_file("cfgs/%s.yml" % arch)
             self._fasterRCNN = resnet(self._classes, 101, pretrained=False, class_agnostic=class_agnostic)

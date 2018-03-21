@@ -15,6 +15,7 @@ labels_mapping = {
 
 TRY_IDENTIFY = False
 
+
 class Instance:
     _instances_count = 0
     face_detector = dlib.get_frontal_face_detector()
@@ -79,7 +80,6 @@ class Instance:
         else:
             print("detect face but unknown")
 
-
     def update(self, ev, partial=False, frame=None):
         self._events.append(ev)
         self._features = ev._features
@@ -93,13 +93,10 @@ class Instance:
         if self._label == 'person' and self._identified == False:
             self._identify(frame)
 
-
-
     def _estimate_object_distance(self, far_threshold=3.0, near_threshold=1.5):
 
         _person_width_in_meters = 0.75
         _focal_length = 210.0
-
 
         width_in_pix = float(self._bbox[3]) - float(self._bbox[1])
 
@@ -127,11 +124,9 @@ class ObjectsTracker:
     def instances(self):
         return self._instances
 
-
     @staticmethod
     def L2(a, b):
         return np.linalg.norm(a-b)
-
 
     def match_events_to_instances(self, events, frame=None):
         if len(self._instances) == 0:
@@ -164,11 +159,9 @@ class ObjectsTracker:
 
         return unused_events
 
-
     def initiate_new_instances(self, events, frame=None):
         for event in events:
             self._instances.append(Instance(event, frame))
-
 
     def filter_events(self, events):
         return events
@@ -187,7 +180,6 @@ class ObjectsTracker:
         for inst in self._instances:
             if inst.stability > 0:
                 keep_instances.append(inst)
-
 
         self._instances = keep_instances
 

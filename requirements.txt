@@ -1,7 +1,9 @@
 cython
-cffi
-opencv-python
-scipy
-easydict
-matplotlib
+cffi==1.11.5
+opencv-python==3.4.0.12
+scipy==1.0.0
+easydict==1.7
+matplotlib==2.1.2
 pyyaml
+redis==2.10.6
+torch==0.3.1
