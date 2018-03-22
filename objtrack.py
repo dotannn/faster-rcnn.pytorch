@@ -95,8 +95,8 @@ class Instance:
 
     def _estimate_object_distance(self, far_threshold=3.0, near_threshold=1.5):
 
-        _person_width_in_meters = 0.75
-        _focal_length = 210.0
+        _person_width_in_meters = 0.6
+        _focal_length = 530.0
 
         width_in_pix = float(self._bbox[3]) - float(self._bbox[1])
 
@@ -116,9 +116,9 @@ class ObjectsTracker:
     def __init__(self):
         self._instances = []
         self._appearance_factor = 0.5
-        self._euclidean_factor = 0.0
+        self._euclidean_factor = 0.5
 
-        self._threshold = 45.0
+        self._threshold = 30.0
 
     @property
     def instances(self):
@@ -148,6 +148,7 @@ class ObjectsTracker:
             if val < self._threshold:
                 inst = self._instances[i]
                 inst.update(ev, frame=frame)
+                total_dist[:, i] = 9999999.0
                 matched_insts.append(inst)
             else:
                 unused_events.append(ev)
@@ -155,7 +156,8 @@ class ObjectsTracker:
         for inst in self._instances:
             if inst in matched_insts:
                 continue
-            inst._stability -= 1
+            inst._stability = 0
+            # inst._stability -= 1
 
         return unused_events
 

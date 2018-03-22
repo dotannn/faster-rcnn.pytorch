@@ -30,6 +30,11 @@ class DetectionEvent:
         # calc center of mass
         self._com = np.array(( self._bbox[0] + self._bbox[2]/2.0, self._bbox[1] + self._bbox[3]/2.0 ))
 
+    def to_dict(self):
+        return {
+            "bbox" : self._bbox.astype('int').tolist(),
+            "label": self._label,
+        }
 
 class ObjectDetector:
     _voc_classes = np.asarray(['__background__',

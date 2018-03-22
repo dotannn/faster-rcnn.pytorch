@@ -43,7 +43,7 @@ def parse_args():
                       default='pascal_voc', type=str)
   parser.add_argument('--net', dest='net',
                     help='vgg16, res101',
-                    default='vgg16', type=str)
+                    default='res101', type=str)
   parser.add_argument('--start_epoch', dest='start_epoch',
                       help='starting epoch',
                       default=1, type=int)
@@ -58,14 +58,14 @@ def parse_args():
                       default=10000, type=int)
 
   parser.add_argument('--save_dir', dest='save_dir',
-                      help='directory to save models', default="/srv/share/jyang375/models",
+                      help='directory to save models', default="./output/",
                       nargs=argparse.REMAINDER)
   parser.add_argument('--nw', dest='num_workers',
                       help='number of worker to load data',
                       default=0, type=int)
   parser.add_argument('--cuda', dest='cuda',
                       help='whether use CUDA',
-                      action='store_true')
+                      action='store_true', default=True)
   parser.add_argument('--ls', dest='large_scale',
                       help='whether use large imag scale',
                       action='store_true')                      
@@ -199,7 +199,7 @@ if __name__ == '__main__':
   # -- Note: Use validation set and disable the flipped to enable faster loading.
   cfg.TRAIN.USE_FLIPPED = True
   cfg.USE_GPU_NMS = args.cuda
-  imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
+  imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name+"+voc_2007_train")
   train_size = len(roidb)
 
   print('{:d} roidb entries'.format(len(roidb)))
@@ -319,7 +319,8 @@ if __name__ == '__main__':
       rois, cls_prob, bbox_pred, \
       rpn_loss_cls, rpn_loss_box, \
       RCNN_loss_cls, RCNN_loss_bbox, \
-      rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+      rois_label, _ = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+
 
       loss = rpn_loss_cls.mean() + rpn_loss_box.mean() \
            + RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
